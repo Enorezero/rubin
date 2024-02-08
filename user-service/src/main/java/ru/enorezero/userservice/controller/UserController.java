@@ -12,27 +12,29 @@ import ru.enorezero.userservice.service.UserService;
 public class UserController {
 
     @Autowired
-    UserService service;
+    UserService userService;
 
     @PostMapping("/add")
     public ResponseEntity<?> add(@RequestBody User user){
-        service.add(user);
+        userService.add(user);
         return ResponseEntity.ok("Пользователь создан");
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getById(@PathVariable Long id){
-        return ResponseEntity.ok(service.getById(id));
+    public ResponseEntity<User> getById(@PathVariable Long id, @RequestHeader("username") String username, @RequestHeader("email") String email){
+        System.out.println(username);
+        System.out.println(email);
+        return ResponseEntity.ok(userService.getById(id));
     }
 
-    @GetMapping("/email/{email}")
-    public ResponseEntity<User> getByEmail(@PathVariable String email){
-        return ResponseEntity.ok(service.getByEmail(email));
+    @GetMapping("/username/{username}")
+    public ResponseEntity<User> getByUsername(@PathVariable String username){
+        return ResponseEntity.ok(userService.getByUsername(username));
     }
 
     @PutMapping("/update")
     public ResponseEntity<?> update(@RequestBody User user){
-        service.update(user);
+        userService.update(user);
         return ResponseEntity.ok("Пользовательно обновлён");
     }
 

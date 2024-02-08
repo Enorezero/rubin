@@ -6,6 +6,7 @@ public interface UserService {
     void add(User user);
     User getById(Long id);
     User getByEmail(String email);
+    User getByUsername(String username);
     void update(User user);
     void deleteById(Long id);
 }

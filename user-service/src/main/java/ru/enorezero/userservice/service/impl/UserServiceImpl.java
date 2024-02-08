@@ -33,6 +33,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getByUsername(String username) {
+        Optional<User> foundUser = Optional.of(repository.findOptionalByUsername(username)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден")));
+        return foundUser.get();
+    }
+
+    @Override
     public void update(User user) {
         Optional<User> foundUser = Optional.of(repository.findOptionalById(user.getId())
                 .orElseThrow(() -> new NotFoundException("Не удалось обновить пользователя")));
