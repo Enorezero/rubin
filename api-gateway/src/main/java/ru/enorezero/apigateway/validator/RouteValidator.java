@@ -14,7 +14,9 @@ public class RouteValidator {
             "/auth/token",
             "/auth/validate",
             "/users/username/**",
-            "/eureka"
+            "/eureka",
+            "/paste/**",
+            "/paste"
     );
 
     public Predicate<ServerHttpRequest> isSecured =

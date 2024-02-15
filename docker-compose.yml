@@ -1,16 +1,28 @@
 version: '3'
 
 services:
-  db:
-      image: postgres:latest
-      container_name: postgres
+  db_user:
+      image: mysql:latest
+      container_name: mysql
       ports:
-        - 5432:5432
+        - 3307:3306
       environment:
-        - POSTGRES_USER=${POSTGRES_USERNAME}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+        MYSQL_DATABASE: users
+        MYSQL_USER: ${MYSQL_USER}
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       env_file:
         - .env
+  db_paste:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    env_file:
+      - .env
   zookeeper:
     image: confluentinc/cp-zookeeper:7.0.1
     container_name: zookeeper

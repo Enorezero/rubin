@@ -16,7 +16,7 @@ import java.util.Map;
 @Service
 public class JwtServiceImpl implements JwtService {
 
-    @Value("${JWT_SECRET_TOKEN}")
+    @Value("${jwt.secret}")
     private String SECRET;
     @Override
     public void validateToken(String token) {
