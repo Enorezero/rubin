@@ -5,7 +5,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.enorezero.pasteservice.exception.StorageUnavaibleException;
+import ru.enorezero.pasteservice.exception.StorageUnavailableException;
 import ru.enorezero.pasteservice.service.StorageService;
 
 import java.io.BufferedReader;
@@ -22,15 +22,14 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public String upload(final String bucketName, final String text){
-        //придумать как лучше называть объекты
         try {
-            String textName = UUID.randomUUID().toString() + text.length();
+            String textName = UUID.randomUUID().toString();
 
             s3Client.putObject(bucketName, textName, text);
 
             return textName;
         }catch (SdkClientException exception){
-            throw new StorageUnavaibleException("Хранилище недоступно");
+            throw new StorageUnavailableException("Хранилище недоступно");
         }
     }
 
@@ -44,7 +43,7 @@ public class StorageServiceImpl implements StorageService {
             return new BufferedReader(new InputStreamReader(inputStream))
                     .lines().collect(Collectors.joining("\n"));
         }catch (SdkClientException exception){
-            throw new StorageUnavaibleException("Хранилище недоступно");
+            throw new StorageUnavailableException("Хранилище недоступно");
         }
     }
 
@@ -53,7 +52,7 @@ public class StorageServiceImpl implements StorageService {
         try {
             s3Client.deleteObject(bucketName, key);
         }catch (SdkClientException exception){
-            throw new StorageUnavaibleException("Хранилище недоступно");
+            throw new StorageUnavailableException("Хранилище недоступно");
         }
     }
 }

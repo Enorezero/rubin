@@ -20,14 +20,15 @@ public class PasteController {
     @Autowired
     PasteService pasteService;
 
-    @GetMapping("/test")
-    public ResponseEntity<String> test(){
-        return ResponseEntity.ok("succesfully!");
-    }
-
     @GetMapping("/{hash}")
     public ResponseEntity<PasteResponse> getByHash(@PathVariable String hash, @Nullable @RequestHeader("username") String username){
         return ResponseEntity.ok(pasteService.getByHash(hash, username));
+    }
+
+    @DeleteMapping("/{hash}")
+    public ResponseEntity<?> deleteByHash(@PathVariable String hash, @Nullable @RequestHeader("username") String username){
+        pasteService.deleteByHash(hash, username);
+        return ResponseEntity.ok("Паста удалена");
     }
 
     @GetMapping("/")

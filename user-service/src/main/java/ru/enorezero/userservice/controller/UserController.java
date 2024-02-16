@@ -20,16 +20,19 @@ public class UserController {
         return ResponseEntity.ok("Пользователь создан");
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getById(@PathVariable Long id, @RequestHeader("username") String username, @RequestHeader("email") String email){
-        System.out.println(username);
-        System.out.println(email);
+    @GetMapping("/ids/{id}")
+    public ResponseEntity<User> getById(@PathVariable Long id){
         return ResponseEntity.ok(userService.getById(id));
     }
 
-    @GetMapping("/username/{username}")
+    @GetMapping("/usernames/{username}")
     public ResponseEntity<User> getByUsername(@PathVariable String username){
         return ResponseEntity.ok(userService.getByUsername(username));
+    }
+
+    @GetMapping("/emails/{email}")
+    public ResponseEntity<User> getByEmail(@PathVariable String email){
+        return ResponseEntity.ok(userService.getByEmail(email));
     }
 
     @PutMapping("/update")
@@ -40,6 +43,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id){
+        userService.deleteById(id);
         return ResponseEntity.ok("Пользователь удален");
     }
 

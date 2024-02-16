@@ -4,10 +4,12 @@ import com.amazonaws.services.kms.model.NotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.enorezero.pasteservice.exception.NoAccessForPrivatePasteException;
-import ru.enorezero.pasteservice.exception.UnhashableLinkException;
+import ru.enorezero.pasteservice.exception.NoAccessForPasteException;
+import ru.enorezero.pasteservice.exception.FailedToDecryptLinkException;
 import ru.enorezero.pasteservice.model.PasteEntity;
 import ru.enorezero.pasteservice.model.Visibility;
 import ru.enorezero.pasteservice.model.dto.PasteRequest;
@@ -22,7 +24,7 @@ import java.util.*;
 @Service
 public class PasteServiceImpl implements PasteService {
 
-    private static ArrayDeque<PasteResponse> publicResponses = new ArrayDeque<>();
+    private static final ArrayDeque<PasteEntity> publicPastes = new ArrayDeque<>();
 
     @Autowired
     private ModelMapper modelMapper;
@@ -36,13 +38,17 @@ public class PasteServiceImpl implements PasteService {
     @Value("${cloud.aws.s3.credentials.bucket.name}")
     private String bucketName;
 
-    @Transactional
     @Override
+    @Transactional
+    @Cacheable(
+            value = "PasteService::getByHash",
+            key = "#hash"
+    )
     public PasteResponse getByHash(String hash, String username) {
-        Optional<PasteEntity> foundEntity = Optional.of(pasteRepository.findOptionalByPastesId(decodeByBase64(hash))
+        Optional<PasteEntity> foundPaste = Optional.of(pasteRepository.findOptionalByPastesId(decodeByBase64(hash))
                 .orElseThrow(() -> new NotFoundException("Паста не найдена")));
 
-        PasteEntity paste =  foundEntity.get();
+        PasteEntity paste =  foundPaste.get();
 
         if(LocalDateTime.now().isAfter(paste.getExpirationTime())){
             pasteRepository.delete(paste);
@@ -50,8 +56,8 @@ public class PasteServiceImpl implements PasteService {
             throw new NotFoundException("Время жизни пасты истекло");
         }
 
-        if(!paste.getStatus().equals( Visibility.PRIVATE) || !paste.getUsername().equals(username)){
-            throw new NoAccessForPrivatePasteException("Вы не обладаете правами для получения этой приватной пасты");
+        if(paste.getStatus().equals( Visibility.PRIVATE) && !paste.getUsername().equals(username)){
+            throw new NoAccessForPasteException("Вы не обладаете нужными правами для получения этой пасты");
         }
 
         String data = storage.download(bucketName, paste.getKey());
@@ -60,16 +66,42 @@ public class PasteServiceImpl implements PasteService {
     }
 
     @Override
-    public List<PasteResponse> getPublicPastes() {
-        return publicResponses.stream().toList();
+    @Transactional
+    @CacheEvict(
+            value = "PasteService::getByHash",
+            key = "#hash"
+    )
+    public void deleteByHash(String hash, String username) {
+        Optional<PasteEntity> foundPaste = Optional.of(pasteRepository.findOptionalByPastesId(decodeByBase64(hash))
+                .orElseThrow(() -> new NotFoundException("Данной пасты не существует")));
+
+        PasteEntity paste =  foundPaste.get();
+
+        if(!username.equals(paste.getUsername())){
+            throw new NoAccessForPasteException("Вы не обладаете нужными правами для получения этой пасты");
+        }
+
+        if(paste.getStatus().equals(Visibility.PUBLIC)){
+            publicPastes.remove(paste);
+        }
+
+        pasteRepository.delete(paste);
     }
 
-    @Transactional
     @Override
-    public String create(PasteRequest request, String username) {
-        String key = storage.upload("rubin",request.getData());
+    public List<PasteResponse> getPublicPastes() {
+        return publicPastes.stream().map(o -> modelMapper.map(o, PasteResponse.class)).toList();
+    }
 
-        PasteEntity paste = new PasteEntity().builder()
+    @Override
+    @Transactional
+    public String create(PasteRequest request, String username) {
+        if(request.getStatus().equals(Visibility.PRIVATE) && username==null){
+            throw new NoAccessForPasteException("Создавать приватные пасты могут только зарегистирированные пользователи");
+        }
+
+        String key = storage.upload("rubin",request.getData());
+        PasteEntity paste = PasteEntity.builder()
                 .key(key)
                 .creationTime(LocalDateTime.now())
                 .expirationTime(LocalDateTime.now().plusSeconds(request.getLifetime().getSeconds()))
@@ -79,9 +111,12 @@ public class PasteServiceImpl implements PasteService {
 
         pasteRepository.save(paste);
 
+        if(publicPastes.size() == 10){
+            publicPastes.pop();
+        }
+
         if(request.getStatus().equals(Visibility.PUBLIC)) {
-            PasteResponse response = modelMapper.map(request, PasteResponse.class);
-            publicResponses.push(response);
+            publicPastes.push(paste);
         }
 
         return encodeByBase64(paste.getPastesId());
@@ -90,13 +125,8 @@ public class PasteServiceImpl implements PasteService {
     @Override
     public List<PasteResponse> getUserPastes(String username) {
         List<PasteEntity> foundPastes = pasteRepository.findPasteEntitiesByUsername(username);
-        List<PasteResponse> responses = new ArrayList<>();
 
-        for(PasteEntity paste : foundPastes){
-            responses.add(modelMapper.map(paste, PasteResponse.class));
-        }
-
-        return responses;
+        return foundPastes.stream().map(o -> modelMapper.map(o, PasteResponse.class)).toList();
     }
 
     private String encodeByBase64(Long id) {
@@ -107,9 +137,8 @@ public class PasteServiceImpl implements PasteService {
         try {
             return Long.parseLong(new String(Base64.getDecoder().decode(hash.getBytes())));
         }catch (NumberFormatException e){
-            throw new UnhashableLinkException("Невозможно расхешировать строку");
+            throw new FailedToDecryptLinkException("Невозможно расхешировать строку");
         }
     }
 
 }
-
