@@ -44,3 +44,10 @@ eureka:
 jwt:
   secret: ${JWT_SECRET_TOKEN}
 
+logging:
+  pattern:
+    console: |
+      {%C{1.} [%-5level] %d{HH:mm:ss} - %msg%n}
+  level:
+    web: trace
+

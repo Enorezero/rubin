@@ -22,8 +22,7 @@ public class UserServiceClient {
         ServiceInstance instance = discoveryClient.getInstances("user-service")
                 .stream().findAny()
                 .orElseThrow(() -> new IllegalStateException("User-service не доступен"));
-        String uri = instance.getUri().toString() + "/users/username/" + username;
-        //Будет ли маппиться?
+        String uri = instance.getUri().toString() + "/users/usernames/" + username;
         return restTemplate.getForEntity(uri, User.class, username);
     }
 
