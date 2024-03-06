@@ -4,6 +4,7 @@ import jakarta.annotation.Nullable;
 import lombok.Data;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.enorezero.pasteservice.model.dto.PasteRequest;
@@ -17,33 +18,35 @@ import java.util.List;
 @RequestMapping("/paste")
 public class PasteController {
 
+    private final String USERNAME_HEADER = "username";
+
     @Autowired
     PasteService pasteService;
 
     @GetMapping("/{hash}")
-    public ResponseEntity<PasteResponse> getByHash(@PathVariable String hash, @Nullable @RequestHeader("username") String username){
-        return ResponseEntity.ok(pasteService.getByHash(hash, username));
+    public ResponseEntity<PasteResponse> getByHash(@PathVariable String hash, @Nullable @RequestHeader(USERNAME_HEADER) String username){
+        return ResponseEntity.status(HttpStatus.OK).body(pasteService.getByHash(hash, username));
     }
 
     @DeleteMapping("/{hash}")
-    public ResponseEntity<?> deleteByHash(@PathVariable String hash, @Nullable @RequestHeader("username") String username){
+    public ResponseEntity<?> deleteByHash(@PathVariable String hash, @Nullable @RequestHeader(USERNAME_HEADER) String username){
         pasteService.deleteByHash(hash, username);
-        return ResponseEntity.ok("Паста удалена");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Паста удалена");
     }
 
     @GetMapping("/")
     public ResponseEntity<List<PasteResponse>> getLastPublic(){
-        return ResponseEntity.ok(pasteService.getPublicPastes());
+        return ResponseEntity.status(HttpStatus.OK).body(pasteService.getPublicPastes());
     }
 
     @PostMapping("/")
-    public ResponseEntity<String> createPaste(@RequestBody PasteRequest request, @Nullable @RequestHeader("username") String username){
-        return ResponseEntity.ok(pasteService.create(request, username));
+    public ResponseEntity<String> createPaste(@RequestBody PasteRequest request, @Nullable @RequestHeader(USERNAME_HEADER) String username){
+        return ResponseEntity.status(HttpStatus.CREATED).body(pasteService.create(request, username));
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<PasteResponse>> getUserPastes(@NonNull @RequestHeader("username") String username){
-        return ResponseEntity.ok(pasteService.getUserPastes(username));
+    public ResponseEntity<List<PasteResponse>> getUserPastes(@NonNull @RequestHeader(USERNAME_HEADER) String username){
+        return ResponseEntity.status(HttpStatus.OK).body(pasteService.getUserPastes(username));
     }
 
 

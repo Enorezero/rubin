@@ -1,6 +1,7 @@
 package ru.enorezero.userservice.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.enorezero.userservice.model.User;
@@ -22,29 +23,35 @@ public class UserController {
 
     @GetMapping("/ids/{id}")
     public ResponseEntity<User> getById(@PathVariable Long id){
-        return ResponseEntity.ok(userService.getById(id));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getById(id));
     }
 
     @GetMapping("/usernames/{username}")
     public ResponseEntity<User> getByUsername(@PathVariable String username){
-        return ResponseEntity.ok(userService.getByUsername(username));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getByUsername(username));
     }
 
     @GetMapping("/emails/{email}")
     public ResponseEntity<User> getByEmail(@PathVariable String email){
-        return ResponseEntity.ok(userService.getByEmail(email));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getByEmail(email));
     }
 
     @PutMapping("/update")
     public ResponseEntity<?> update(@RequestBody User user){
         userService.update(user);
-        return ResponseEntity.ok("Пользовательно обновлён");
+        return ResponseEntity.status(HttpStatus.OK).body("Пользовательно обновлён");
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/ids/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id){
         userService.deleteById(id);
-        return ResponseEntity.ok("Пользователь удален");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Пользователь удален");
+    }
+
+    @PostMapping("/validate")
+    public ResponseEntity<?> validate(@RequestBody User user){
+        userService.validate(user);
+        return ResponseEntity.status(HttpStatus.OK).body("Валидные данные");
     }
 
 }

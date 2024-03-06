@@ -11,12 +11,12 @@ public enum ExpirationTime {
     YEAR(31536000),
     FIVE_YEAR(157680000);
 
-    int seconds;
+    final int seconds;
 
     ExpirationTime(int seconds) {
             this.seconds = seconds;
-        }
-        public int getSeconds() {
-            return this.seconds;
-        }
     }
+    public int getSeconds() {
+            return this.seconds;
+    }
+}

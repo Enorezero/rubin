@@ -19,7 +19,6 @@ public class KafkaProducer {
     @Autowired
     private ObjectMapper objectMapper;
 
-
     @SneakyThrows
     public void sendMessage(User user){
         String userAsMessage = objectMapper.writeValueAsString(user);

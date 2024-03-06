@@ -1,7 +1,8 @@
 package ru.enorezero.notificationservice.service;
 
-import java.util.Properties;
+import ru.enorezero.notificationservice.dto.UserDto;
 
 public interface NotificationService {
-    void send(String email);
+    void sendRegistrationEmail(UserDto user);
+    void sendCustomEmail(UserDto user, String text);
 }

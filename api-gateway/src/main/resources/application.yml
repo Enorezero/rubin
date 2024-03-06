@@ -18,22 +18,21 @@ spring:
           predicates:
             - Path=/auth/**
           filters:
-            - AuthenticationFilter
-
+            - RoleAuth
 
         - id: user-service
           uri: lb://user-service
           predicates:
             - Path=/users/**
           filters:
-            - AuthenticationFilter
+            - RoleAuth=ADMIN
 
         - id: paste-service
           uri: lb://paste-service
           predicates:
             - Path=/paste/**
           filters:
-            - AuthenticationFilter
+            - RoleAuth
 
 eureka:
   client:

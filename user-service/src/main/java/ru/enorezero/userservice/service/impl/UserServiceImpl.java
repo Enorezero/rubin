@@ -70,5 +70,9 @@ public class UserServiceImpl implements UserService {
         repository.deleteById(id);
     }
 
+    @Override
+    public void validate(User user) {
+
+    }
 
 }

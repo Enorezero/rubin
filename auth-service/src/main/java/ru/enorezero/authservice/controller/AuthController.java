@@ -1,6 +1,7 @@
 package ru.enorezero.authservice.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,23 +24,23 @@ public class AuthController {
     @PostMapping("/signup")
     ResponseEntity<?> signUp(@RequestBody User user){
         authService.signUp(user);
-        return ResponseEntity.ok("Пользователь зарегистрирован");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Пользователь зарегистирован");
     }
 
     @PostMapping("/token")
     public ResponseEntity<String> getToken(@RequestBody AuthRequest authRequest) {
         Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
         if (authenticate.isAuthenticated()) {
-            return ResponseEntity.ok(authService.generateToken(authRequest.getUsername()));
+            return ResponseEntity.status(HttpStatus.OK).body(authService.generateToken(authRequest));
         } else {
             throw new RuntimeException("Неверный access токен");
         }
     }
 
     @GetMapping("/validate")
-    public String validateToken(@RequestParam("token") String token) {
+    public ResponseEntity<String> validateToken(@RequestParam("token") String token) {
         authService.validateToken(token);
-        return "Токен действителен";
+        return ResponseEntity.status(HttpStatus.OK).body("Токен действителен");
     }
 
 }

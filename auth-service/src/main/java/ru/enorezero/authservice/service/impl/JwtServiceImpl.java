@@ -6,26 +6,30 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.enorezero.authservice.model.Role;
 import ru.enorezero.authservice.service.JwtService;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class JwtServiceImpl implements JwtService {
 
     @Value("${jwt.secret}")
     private String SECRET;
+    private final String ROLES_CLAIM = "roles";
     @Override
     public void validateToken(String token) {
         Jwts.parserBuilder().setSigningKey(getSignKey()).build().parseClaimsJws(token);
     }
 
     @Override
-    public String generateToken(String username) {
+    public String generateToken(String username, Set<Role> roles) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put(ROLES_CLAIM, roles);
         return createToken(claims, username);
     }
 

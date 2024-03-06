@@ -20,7 +20,7 @@ public class KafkaConsumer {
     @KafkaListener(topics = "${topic.name}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeMessage(String message){
         UserDto userDto = objectMapper.readValue(message, UserDto.class);
-        notificationService.send(userDto.getEmail());
+        notificationService.sendRegistrationEmail(userDto);
     }
 
 }
