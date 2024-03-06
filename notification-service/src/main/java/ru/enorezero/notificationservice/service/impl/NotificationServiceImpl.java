@@ -19,21 +19,20 @@ public class NotificationServiceImpl implements NotificationService {
     private String sender;
     @Override
     public void sendRegistrationEmail(UserDto user) {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setFrom(sender);
-        mailMessage.setSubject(user.getUsername() + ", cпасибо за регистрацию!");
-        mailMessage.setText("Мы ценим каждого пользователя!");
-        mailMessage.setTo(user.getEmail());
-        mailSender.send(mailMessage);
+        sendEmail(user.getEmail(), user.getUsername() + ", спасибо за регистрацию!", "Мы ценим каждого пользователя!");
     }
 
     @Override
-    public void sendCustomEmail(UserDto user, String text) {
+    public void sendCustomEmail(String email, String subject, String text) {
+        sendEmail(email, subject, text);
+    }
+
+    private void sendEmail(String email, String subject, String text) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setFrom(sender);
-        mailMessage.setSubject("Сообщение от администрации rubin.");
+        mailMessage.setSubject(subject);
         mailMessage.setText(text);
-        mailMessage.setTo(user.getEmail());
+        mailMessage.setTo(email);
         mailSender.send(mailMessage);
     }
 }

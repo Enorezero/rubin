@@ -17,8 +17,8 @@ public class NotificationController {
     NotificationService notificationService;
 
     @GetMapping("/custom")
-    ResponseEntity<?> send(UserDto user, String text){
-        notificationService.sendCustomEmail(user, text);
-        return ResponseEntity.status(HttpStatus.OK).body("Сообщение пользователю " + user.getUsername() +  " отправлено.");
+    ResponseEntity<?> send(String email, String subject, String text){
+        notificationService.sendCustomEmail(email, subject, text);
+        return ResponseEntity.status(HttpStatus.OK).body("Сообщение на почту " + email + " .");
     }
 }

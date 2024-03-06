@@ -29,11 +29,9 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void signUp(User user) {
         ResponseEntity<?> response = userServiceClient.isExist(user);
-
         if(response.getStatusCode() != HttpStatus.OK) {
             throw new IllegalArgumentException("Пользователь с такими данными уже зарегистирован");
         }
-
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         producer.sendMessage(user);
     }

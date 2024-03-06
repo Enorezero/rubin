@@ -72,7 +72,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void validate(User user) {
-
+        if(repository.existsUserByEmailAndUsername(user.getEmail(), user.getUsername())){
+            throw new IllegalArgumentException("Пользователь с таким юзернеймом и почтой уже существует");
+        }
     }
 
 }

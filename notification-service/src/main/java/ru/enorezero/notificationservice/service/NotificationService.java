@@ -4,5 +4,5 @@ import ru.enorezero.notificationservice.dto.UserDto;
 
 public interface NotificationService {
     void sendRegistrationEmail(UserDto user);
-    void sendCustomEmail(UserDto user, String text);
+    void sendCustomEmail(String email, String subject, String text);
 }

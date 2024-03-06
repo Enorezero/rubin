@@ -26,12 +26,12 @@ public class UserServiceClient {
         return restTemplate.getForEntity(uri, User.class, username);
     }
 
-    public ResponseEntity<?> isExist(User user){
+    public ResponseEntity<String> isExist(User user){
         ServiceInstance instance = discoveryClient.getInstances("user-service")
                 .stream().findAny()
                 .orElseThrow(() -> new IllegalStateException("User-service не доступен"));
         String uri = instance.getUri().toString() + "/users/validate";
-        return restTemplate.postForEntity(uri, user, User.class);
+        return restTemplate.postForEntity(uri, user, String.class);
     }
 
 }
