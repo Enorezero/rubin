@@ -33,6 +33,7 @@ public class NotificationServiceImpl implements NotificationService {
         mailMessage.setSubject(subject);
         mailMessage.setText(text);
         mailMessage.setTo(email);
+        System.out.println(mailMessage);
         mailSender.send(mailMessage);
     }
 }
